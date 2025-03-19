@@ -1,0 +1,286 @@
+<div class="max-w-6xl mx-auto">
+  <form id="transferForm" class="space-y-8">
+    <!-- SECCIONES DE ORIGEN Y DESTINO -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- SECCIÓN DE ORIGEN -->
+      <div class="bg-gray-700 p-6 rounded-lg shadow-md h-full">
+        <h2 class="text-xl font-semibold text-cyan-300 mb-4">Datos de Origen</h2>
+        
+        <!-- URL de la hoja de origen -->
+        <div class="mb-4">
+          <label for="urlOrigen" class="block text-sm font-medium text-gray-300 mb-1">URL de la hoja de Google</label>
+          <input
+            type="url"
+            id="urlOrigen"
+            name="urlOrigen"
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+            class="w-full bg-gray-800 border border-gray-600 rounded-md py-2 px-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            required
+          >
+          <button 
+            type="button"
+            id="btnCargarHojas"
+            class="mt-2 bg-cyan-600 hover:bg-cyan-700 text-white py-1 px-3 rounded-md text-sm transition duration-150 ease-in-out"
+          >
+            Cargar hojas disponibles
+          </button>
+          <div id="cargandoHojas" class="hidden items-center mt-2 text-gray-400">
+            <div class="loader mr-2 w-4 h-4 rounded-full border-2 border-gray-300"></div>
+            <span class="text-sm">Cargando hojas...</span>
+          </div>
+        </div>
+
+        <!-- Nombre de la hoja de origen -->
+        <div class="mb-4">
+          <label for="nombreHojaOrigen" class="block text-sm font-medium text-gray-300 mb-1">Hoja de origen</label>
+          <select
+            id="nombreHojaOrigen"
+            name="nombreHojaOrigen"
+            class="w-full bg-gray-800 border border-gray-600 rounded-md py-2 px-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            disabled
+          >
+            <option value="">Selecciona una hoja</option>
+          </select>
+        </div>
+
+        <!-- Tipo de transferencia -->
+        <div class="mb-4">
+          <span class="block text-sm font-medium text-gray-300 mb-1">Tipo de transferencia</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div class="flex items-center">
+              <input
+                type="radio"
+                id="tipoHoja"
+                name="tipoTransferencia"
+                value="hoja"
+                class="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500"
+                checked
+              >
+              <label for="tipoHoja" class="ml-2 text-sm text-gray-300">
+                Hoja completa
+              </label>
+            </div>
+            <div class="flex items-center">
+              <input
+                type="radio"
+                id="tipoRango"
+                name="tipoTransferencia"
+                value="rango"
+                class="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500"
+              >
+              <label for="tipoRango" class="ml-2 text-sm text-gray-300">
+                Rango de celdas
+              </label>
+            </div>
+            <div class="flex items-center">
+              <input
+                type="radio"
+                id="tipoColumnas"
+                name="tipoTransferencia"
+                value="columnas"
+                class="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500"
+              >
+              <label for="tipoColumnas" class="ml-2 text-sm text-gray-300">
+                Por columnas
+              </label>
+            </div>
+            <div class="flex items-center">
+              <input
+                type="radio"
+                id="tipoFilas"
+                name="tipoTransferencia"
+                value="filas"
+                class="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500"
+              >
+              <label for="tipoFilas" class="ml-2 text-sm text-gray-300">
+                Por filas
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPCIONES CONDICIONALES DE TRANSFERENCIA -->
+        <!-- Opción para rango de celdas -->
+        <div id="opcionRango" class="hidden mb-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <label for="rangoInicio" class="text-sm font-medium text-gray-300">Desde</label>
+            <input
+              type="text"
+              id="rangoInicio"
+              name="rangoInicio"
+              placeholder="A1"
+              class="bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-24"
+            >
+            <span class="text-gray-300 mx-1">:</span>
+            <label for="rangoFin" class="text-sm font-medium text-gray-300">Hasta</label>
+            <input
+              type="text"
+              id="rangoFin"
+              name="rangoFin"
+              placeholder="B10"
+              class="bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-24"
+            >
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Ejemplo: A1:C10</p>
+        </div>
+
+        <!-- Opción para columnas -->
+        <div id="opcionColumnas" class="hidden mb-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <label for="columnaInicio" class="text-sm font-medium text-gray-300">Columna inicial</label>
+            <input
+              type="text"
+              id="columnaInicio"
+              name="columnaInicio"
+              placeholder="A"
+              class="bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-16"
+            >
+            <label for="columnaCantidad" class="text-sm font-medium text-gray-300">Cantidad</label>
+            <input
+              type="number"
+              id="columnaCantidad"
+              name="columnaCantidad"
+              placeholder="3"
+              min="1"
+              class="bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-24"
+            >
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Ejemplo: A y 3 transferirá las columnas A, B y C</p>
+        </div>
+
+        <!-- Opción para filas -->
+        <div id="opcionFilas" class="hidden mb-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <label for="filaInicio" class="text-sm font-medium text-gray-300">Fila inicial</label>
+            <input
+              type="number"
+              id="filaInicio"
+              name="filaInicio"
+              placeholder="1"
+              min="1"
+              class="bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-24"
+            >
+            <label for="filaCantidad" class="text-sm font-medium text-gray-300">Cantidad</label>
+            <input
+              type="number"
+              id="filaCantidad"
+              name="filaCantidad"
+              placeholder="5"
+              min="1"
+              class="bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-24"
+            >
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Ejemplo: 1 y 5 transferirá las filas 1 a 5</p>
+        </div>
+      </div>
+
+      <!-- SECCIÓN DE DESTINO -->
+      <div class="bg-gray-700 p-6 rounded-lg shadow-md h-full">
+        <h2 class="text-xl font-semibold text-cyan-300 mb-4">Datos de Destino</h2>
+        
+        <!-- URL de la hoja de destino -->
+        <div class="mb-4">
+          <label for="urlDestino" class="block text-sm font-medium text-gray-300 mb-1">URL de la hoja de Google</label>
+          <input
+            type="url"
+            id="urlDestino"
+            name="urlDestino"
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+            class="w-full bg-gray-800 border border-gray-600 rounded-md py-2 px-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            required
+          >
+          <button 
+            type="button"
+            id="btnCargarHojasDestino"
+            class="mt-2 bg-cyan-600 hover:bg-cyan-700 text-white py-1 px-3 rounded-md text-sm transition duration-150 ease-in-out"
+          >
+            Cargar hojas disponibles
+          </button>
+          <div id="cargandoHojasDestino" class="hidden items-center mt-2 text-gray-400">
+            <div class="loader mr-2 w-4 h-4 rounded-full border-2 border-gray-300"></div>
+            <span class="text-sm">Cargando hojas...</span>
+          </div>
+        </div>
+
+        <!-- Tipo de destino -->
+        <div class="mb-4">
+          <span class="block text-sm font-medium text-gray-300 mb-1">Insertar en</span>
+          <div class="grid grid-cols-1 gap-2">
+            <div class="flex items-center">
+              <input
+                type="radio"
+                id="tipoCelda"
+                name="tipoDestino"
+                value="celda"
+                class="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500"
+                checked
+              >
+              <label for="tipoCelda" class="ml-2 text-sm text-gray-300">
+                Desde celda específica
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nombre de la hoja de destino -->
+        <div class="mb-4">
+          <label for="nombreHojaDestino" class="block text-sm font-medium text-gray-300 mb-1">Hoja de destino</label>
+          <select
+            id="nombreHojaDestino"
+            name="nombreHojaDestino"
+            class="w-full bg-gray-800 border border-gray-600 rounded-md py-2 px-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            disabled
+          >
+            <option value="">Selecciona una hoja</option>
+          </select>
+        </div>
+
+        <!-- Celda inicial de destino (condicional) -->
+        <div id="opcionCeldaDestino" class="mb-4">
+          <label for="celdaInicio" class="block text-sm font-medium text-gray-300 mb-1">Celda inicial</label>
+          <input
+            type="text"
+            id="celdaInicio"
+            name="celdaInicio"
+            placeholder="A1"
+            value="A1"
+            class="bg-gray-800 border border-gray-600 rounded-md py-2 px-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-full max-w-xs"
+          >
+          <p class="text-xs text-gray-400 mt-1">Celda donde comenzará la inserción de datos (predeterminado: A1)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTONES DE ACCIÓN (CENTRADOS ABAJO) -->
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+      <button
+        type="submit"
+        id="btnTransferir"
+        class="bg-cyan-600 hover:bg-cyan-500 focus:ring-cyan-500 focus:ring-offset-cyan-200 text-white px-5 py-3 rounded-lg transition duration-150 ease-in-out flex-1 sm:max-w-xs"
+      >
+        Transferir Datos
+      </button>
+      
+      <button
+        type="button"
+        id="btnLimpiar"
+        class="bg-gray-600 hover:bg-gray-500 focus:ring-gray-500 focus:ring-offset-gray-200 text-white px-5 py-3 rounded-lg transition duration-150 ease-in-out flex-1 sm:max-w-xs"
+      >
+        Limpiar Formulario
+      </button>
+    </div>
+
+    <!-- Indicador de procesamiento -->
+    <div id="procesando" class="hidden justify-center items-center mt-4">
+      <div class="loader mr-3 w-5 h-5 rounded-full border-2 border-gray-300"></div>
+      <span class="text-gray-300">Procesando transferencia...</span>
+    </div>
+  </form>
+  
+  <!-- Notificación fija en la parte inferior -->
+  <div id="notification" class="hidden fixed bottom-0 left-0 right-0 mb-0 p-4 text-center z-50">
+    <div class="max-w-2xl mx-auto bg-opacity-90 rounded-t-lg shadow-lg">
+      <p id="notification-message" class="py-2 px-4"></p>
+    </div>
+  </div>
+</div>

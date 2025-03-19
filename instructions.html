@@ -1,0 +1,152 @@
+<!-- Reemplazar la sección de instrucciones con este código overlay -->
+
+<div class="mb-6">
+    <button 
+      id="toggleInstructions" 
+      class="flex items-center justify-between w-full py-3 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg shadow-md transition-colors duration-200"
+      aria-expanded="false"
+    >
+      <div class="flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-500">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+        </svg>
+        <h2 class="text-xl font-semibold text-gray-100">Instrucciones de Uso</h2>
+      </div>
+      
+      <!-- Reemplazar el icono de flecha por un icono de "ver más" -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-400 transition-opacity duration-200" id="infoIcon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    </button>
+    
+    <!-- Contenido de instrucciones como overlay flotante -->
+    <div 
+      id="instructionsContent" 
+      class="hidden fixed left-0 right-0 mx-auto w-full max-w-3xl bg-gray-800 border border-gray-700 rounded-lg p-5 shadow-xl z-20 mt-2"
+      style="top: 20%; max-height: 60vh; overflow-y: auto;"
+    >
+      <!-- Botón de cerrar en la esquina superior derecha -->
+      <button 
+        id="closeInstructions" 
+        class="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
+        aria-label="Cerrar instrucciones"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <h3 class="text-xl font-semibold text-gray-100 mb-4">¿Cómo usar Sheets RailCar?</h3>
+      
+      <ol class="space-y-4 text-gray-300">
+        <li class="flex items-start">
+          <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-900 text-blue-300 font-semibold mr-3">1</span>
+          <div>
+            <p class="font-medium">Ingresa las URLs de los archivos</p>
+            <p class="text-sm text-gray-400">Copia y pega las URLs completas de los archivos de Google Sheets de origen y destino.</p>
+          </div>
+        </li>
+        <li class="flex items-start">
+          <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-900 text-blue-300 font-semibold mr-3">2</span>
+          <div>
+            <p class="font-medium">Configura los rangos de datos</p>
+            <p class="text-sm text-gray-400">Selecciona el tipo de transferencia (hoja completa, rango específico, columnas o filas) y especifica la celda de destino.</p>
+          </div>
+        </li>
+        <li class="flex items-start">
+          <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-900 text-blue-300 font-semibold mr-3">3</span>
+          <div>
+            <p class="font-medium">Transfiere los datos</p>
+            <p class="text-sm text-gray-400">Presiona el botón "Transferir Datos" y espera a que el proceso finalice.</p>
+          </div>
+        </li>
+      </ol>
+
+      <p class="text-sm text-white mt-4">
+        <span class="font-medium">¿Por qué usar este Script?</span> El mayor provecho está al trabajar con grandes volúmenes, ya que Google Sheets tiende a trabarse cuando seleccionamos muchos datos a la vez.
+      </p>
+
+      
+      <div class="mt-4 p-3 bg-blue-900/30 border border-blue-800 rounded-md">
+        <div class="flex items-start">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-400 mr-2 mt-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+          </svg>
+          <p class="text-sm text-blue-300">
+            <span class="font-medium">Consejo:</span> Para obtener mejores resultados, asegúrate de que los permisos de ambas hojas estén configurados correctamente y que la hoja de destino no tenga validaciones de datos complejas.
+          </p>
+        </div>
+      </div>
+    <div class="mt-4 p-3 bg-yellow-900/30 border border-yellow-800 rounded-md">
+      <div class="flex items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-yellow-400 mr-2 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.5 19h17a1 1 0 00.87-1.5l-7.5-13a1 1 0 00-1.74 0z" />
+        </svg>
+        <p class="text-sm text-yellow-300">
+          <span class="font-medium">Advertencia:</span> Debes tener en cuenta que los datos se sobreescriben en la hoja destino, y que Google Sheets puede tener ciertas limitaciones en la cantidad de datos soportados.
+        </p>
+      </div>
+    </div>
+    </div>
+  </div>
+  
+  <!-- Overlay background semitransparente, para toda la página -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-10"></div>
+  
+  <!-- Script propio -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Aplicación Sheets RailCar iniciada');
+      
+      // Manejo del desplegable de instrucciones
+      const toggleButton = document.getElementById('toggleInstructions');
+      const instructionsContent = document.getElementById('instructionsContent');
+      const infoIcon = document.getElementById('infoIcon'); // Cambiado de arrowIcon a infoIcon
+      const overlay = document.getElementById('overlay');
+      const closeButton = document.getElementById('closeInstructions');
+      
+      // Función para mostrar instrucciones
+      function showInstructions() {
+        instructionsContent.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+        infoIcon.classList.add('text-white');
+        infoIcon.classList.remove('text-blue-400');
+        toggleButton.setAttribute('aria-expanded', 'true');
+        
+        // Cerrar instrucciones al hacer click afuera
+        overlay.onclick = hideInstructions;
+      }
+      
+      // Función para ocultar instrucciones
+      function hideInstructions() {
+        instructionsContent.classList.add('hidden');
+        overlay.classList.add('hidden');
+        infoIcon.classList.remove('text-white');
+        infoIcon.classList.add('text-blue-400');
+        toggleButton.setAttribute('aria-expanded', 'false');
+      }
+      
+      // Manejar eventos de click
+      if (toggleButton && instructionsContent && infoIcon && overlay && closeButton) {
+        toggleButton.addEventListener('click', function() {
+          const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+          
+          if (isExpanded) {
+            hideInstructions();
+          } else {
+            showInstructions();
+          }
+        });
+        
+        closeButton.addEventListener('click', hideInstructions);
+        
+        // Cerrar al presionar ESC
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && !instructionsContent.classList.contains('hidden')) {
+            hideInstructions();
+          }
+        });
+      }
+    });
+  </script>

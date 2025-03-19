@@ -1,0 +1,463 @@
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Las referencias a elementos del DOM
+    const transferForm = document.getElementById('transferForm');
+    const urlOrigen = document.getElementById('urlOrigen');
+    const btnCargarHojas = document.getElementById('btnCargarHojas');
+    const cargandoHojas = document.getElementById('cargandoHojas');
+    const nombreHojaOrigen = document.getElementById('nombreHojaOrigen');
+    const urlDestino = document.getElementById('urlDestino');
+    const btnCargarHojasDestino = document.getElementById('btnCargarHojasDestino');
+    const cargandoHojasDestino = document.getElementById('cargandoHojasDestino');
+    const nombreHojaDestino = document.getElementById('nombreHojaDestino');
+    const btnTransferir = document.getElementById('btnTransferir');
+    const btnLimpiar = document.getElementById('btnLimpiar');
+    const procesando = document.getElementById('procesando');
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+  
+    // Referencias a opciones condicionales
+    const opcionRango = document.getElementById('opcionRango');
+    const opcionColumnas = document.getElementById('opcionColumnas');
+    const opcionFilas = document.getElementById('opcionFilas');
+    const opcionCeldaDestino = document.getElementById('opcionCeldaDestino');
+    
+    const radiosTipoTransferencia = document.getElementsByName('tipoTransferencia');
+    const radiosTipoDestino = document.getElementsByName('tipoDestino');
+  
+    // Función para validar URL de Google Sheets
+    function esUrlGoogleSheetsValida(url) {
+      const patronSheets = /^https:\/\/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/i;
+      return patronSheets.test(url);
+    }
+    
+    // Función para validar formato de celda (como por ej. A1)
+    function esCeldaValida(celda) {
+      const patronCelda = /^[A-Za-z]+[0-9]+$/;
+      return patronCelda.test(celda);
+    }
+    
+    // Función para validar formato de rango (ej. A1:B10)
+    function esRangoValido(rango) {
+      const patronRango = /^[A-Za-z]+[0-9]+:[A-Za-z]+[0-9]+$/;
+      return patronRango.test(rango);
+    }
+  
+    // Función para mostrar notificaciones mejorada
+    function mostrarNotificacion(mensaje, esExito) {
+      // Crear o actualizar el contenido de la notificación
+      const notificationContainer = document.createElement('div');
+      notificationContainer.className = esExito ? 
+        'bg-green-700 text-white rounded-t-lg shadow-lg p-4 max-w-2xl mx-auto' : 
+        'bg-red-700 text-white rounded-t-lg shadow-lg p-4 max-w-2xl mx-auto';
+      
+      const content = document.createElement('div');
+      content.className = 'flex justify-between items-center';
+      
+      const messageText = document.createElement('p');
+      messageText.textContent = mensaje;
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '&times;';
+      closeBtn.className = 'text-xl font-bold focus:outline-none';
+      closeBtn.setAttribute('aria-label', 'Cerrar notificación');
+      closeBtn.onclick = function() {
+        notification.className = 'hidden';
+      };
+      
+      content.appendChild(messageText);
+      content.appendChild(closeBtn);
+      notificationContainer.appendChild(content);
+      
+      // Limpiar contenido anterior y agregar el nuevo
+      notification.innerHTML = '';
+      notification.appendChild(notificationContainer);
+      
+      // Mostrar la notificación
+      notification.className = 'fixed bottom-0 left-0 right-0 mb-0 p-4 text-center z-50';
+      
+      // Si es mensaje de éxito, ocultar automáticamente después de 5 segundos
+      if (esExito) {
+        setTimeout(() => {
+          // Verificar si la notificación sigue siendo la misma antes de ocultarla
+          if (notification.contains(notificationContainer)) {
+            notification.className = 'hidden';
+          }
+        }, 5000);
+      }
+    }
+  
+    // Cargar hojas de origen cuando se haga click en el botón
+    btnCargarHojas.addEventListener('click', function() {
+      const url = urlOrigen.value.trim();
+      
+      // Validar URL
+      if (!url || !esUrlGoogleSheetsValida(url)) {
+        mostrarNotificacion('Por favor, introduce una URL válida de Google Sheets (https://docs.google.com/spreadsheets/d/...)', false);
+        urlOrigen.focus();
+        return;
+      }
+  
+      // Mostrar indicador de carga y deshabilitar botón
+      cargandoHojas.classList.remove('hidden');
+      cargandoHojas.classList.add('flex');
+      nombreHojaOrigen.disabled = true;
+      btnCargarHojas.disabled = true;
+      btnCargarHojas.classList.add('opacity-50');
+      
+      // Llamar a la función del servidor para obtener las hojas
+      google.script.run
+        .withSuccessHandler(function(hojas) {
+          // Ocultar indicador de carga y habilitar botón
+          cargandoHojas.classList.add('hidden');
+          cargandoHojas.classList.remove('flex');
+          btnCargarHojas.disabled = false;
+          btnCargarHojas.classList.remove('opacity-50');
+          
+          // Comprobar si hay un error
+          if (hojas && hojas.length > 0 && typeof hojas[0] === 'string' && hojas[0].startsWith('Error:')) {
+            mostrarNotificacion(hojas[0], false);
+            return;
+          }
+          
+          // Llenar el desplegable con las hojas
+          nombreHojaOrigen.innerHTML = '';
+          const opcionDefault = document.createElement('option');
+          opcionDefault.value = '';
+          opcionDefault.textContent = 'Selecciona una hoja';
+          nombreHojaOrigen.appendChild(opcionDefault);
+          
+          hojas.forEach(function(hoja) {
+            const option = document.createElement('option');
+            option.value = hoja;
+            option.textContent = hoja;
+            nombreHojaOrigen.appendChild(option);
+          });
+          
+          nombreHojaOrigen.disabled = false;
+          mostrarNotificacion(`${hojas.length} hojas cargadas correctamente`, true);
+        })
+        .withFailureHandler(function(error) {
+          cargandoHojas.classList.add('hidden');
+          cargandoHojas.classList.remove('flex');
+          btnCargarHojas.disabled = false;
+          btnCargarHojas.classList.remove('opacity-50');
+          mostrarNotificacion('Error al cargar hojas: ' + error.message, false);
+        })
+        .obtenerHojas(url);
+    });
+  
+    // Cargar hojas de destino cuando se haga click en el botón
+    btnCargarHojasDestino.addEventListener('click', function() {
+      const url = urlDestino.value.trim();
+      
+      // Validar URL
+      if (!url || !esUrlGoogleSheetsValida(url)) {
+        mostrarNotificacion('Por favor, introduce una URL válida de Google Sheets (https://docs.google.com/spreadsheets/d/...)', false);
+        urlDestino.focus();
+        return;
+      }
+  
+      // Mostrar indicador de carga y deshabilitar botón para evitar doble click :B
+      cargandoHojasDestino.classList.remove('hidden');
+      cargandoHojasDestino.classList.add('flex');
+      nombreHojaDestino.disabled = true;
+      btnCargarHojasDestino.disabled = true;
+      btnCargarHojasDestino.classList.add('opacity-50');
+      
+      // Llamar a la función del servidor para obtener las hojas
+      google.script.run
+        .withSuccessHandler(function(hojas) {
+          // Ocultar indicador de carga y habilitar botón
+          cargandoHojasDestino.classList.add('hidden');
+          cargandoHojasDestino.classList.remove('flex');
+          btnCargarHojasDestino.disabled = false;
+          btnCargarHojasDestino.classList.remove('opacity-50');
+          
+          // Comprobar si hay error
+          if (hojas && hojas.length > 0 && typeof hojas[0] === 'string' && hojas[0].startsWith('Error:')) {
+            mostrarNotificacion(hojas[0], false);
+            return;
+          }
+          
+          // Llenar el desplegable con las hojas
+          nombreHojaDestino.innerHTML = '';
+          const opcionDefault = document.createElement('option');
+          opcionDefault.value = '';
+          opcionDefault.textContent = 'Selecciona una hoja';
+          nombreHojaDestino.appendChild(opcionDefault);
+          
+          hojas.forEach(function(hoja) {
+            const option = document.createElement('option');
+            option.value = hoja;
+            option.textContent = hoja;
+            nombreHojaDestino.appendChild(option);
+          });
+          
+          nombreHojaDestino.disabled = false;
+          mostrarNotificacion(`${hojas.length} hojas de destino cargadas correctamente`, true);
+        })
+        .withFailureHandler(function(error) {
+          cargandoHojasDestino.classList.add('hidden');
+          cargandoHojasDestino.classList.remove('flex');
+          btnCargarHojasDestino.disabled = false;
+          btnCargarHojasDestino.classList.remove('opacity-50');
+          mostrarNotificacion('Error al cargar hojas: ' + error.message, false);
+        })
+        .obtenerHojas(url);
+    });
+  
+    // Manejar cambios en el tipo de transferencia
+    radiosTipoTransferencia.forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        // Ocultar todas las opciones condicionales
+        opcionRango.classList.add('hidden');
+        opcionColumnas.classList.add('hidden');
+        opcionFilas.classList.add('hidden');
+        
+        // Mostrar la opción correspondiente al tipo seleccionado
+        switch (this.value) {
+          case 'rango':
+            opcionRango.classList.remove('hidden');
+            break;
+          case 'columnas':
+            opcionColumnas.classList.remove('hidden');
+            break;
+          case 'filas':
+            opcionFilas.classList.remove('hidden');
+            break;
+        }
+      });
+    });
+  
+    // Asegurarse de que la opción de celda destino esté siempre visible
+    if (opcionCeldaDestino) {
+      opcionCeldaDestino.classList.remove('hidden');
+    }
+    
+    // Validación en tiempo real para campo de rango
+    if (document.getElementById('rangoInicio') && document.getElementById('rangoFin')) {
+      const rangoInicio = document.getElementById('rangoInicio');
+      const rangoFin = document.getElementById('rangoFin');
+      
+      rangoInicio.addEventListener('blur', function() {
+        if (this.value && !esCeldaValida(this.value)) {
+          this.classList.add('border-red-500');
+          mostrarNotificacion(`Formato de celda "${this.value}" inválido. Use formato como A1`, false);
+        } else {
+          this.classList.remove('border-red-500');
+        }
+      });
+      
+      rangoFin.addEventListener('blur', function() {
+        if (this.value && !esCeldaValida(this.value)) {
+          this.classList.add('border-red-500');
+          mostrarNotificacion(`Formato de celda "${this.value}" inválido. Use formato como B10`, false);
+        } else {
+          this.classList.remove('border-red-500');
+        }
+      });
+    }
+    
+    // Validación en tiempo real para columna inicial
+    if (document.getElementById('columnaInicio')) {
+      const columnaInicio = document.getElementById('columnaInicio');
+      
+      columnaInicio.addEventListener('blur', function() {
+        if (this.value && !/^[A-Za-z]+$/.test(this.value)) {
+          this.classList.add('border-red-500');
+          mostrarNotificacion(`Columna "${this.value}" inválida. Debe ser una letra (A-Z)`, false);
+        } else {
+          this.classList.remove('border-red-500');
+        }
+      });
+    }
+    
+    // Validación en tiempo real para celda de inicio
+    if (document.getElementById('celdaInicio')) {
+      const celdaInicio = document.getElementById('celdaInicio');
+      
+      celdaInicio.addEventListener('blur', function() {
+        if (this.value && !esCeldaValida(this.value)) {
+          this.classList.add('border-red-500');
+          mostrarNotificacion(`Formato de celda "${this.value}" inválido. Use formato como A1`, false);
+        } else {
+          this.classList.remove('border-red-500');
+        }
+      });
+    }
+    
+    // Mejorar la función de limpiar para que también limpie las notificaciones
+    btnLimpiar.addEventListener('click', function(e) {
+      e.preventDefault();
+      transferForm.reset();
+      
+      // Ocultar todas las opciones condicionales
+      opcionRango.classList.add('hidden');
+      opcionColumnas.classList.add('hidden');
+      opcionFilas.classList.add('hidden');
+      opcionCeldaDestino.classList.add('hidden');
+      
+      // Limpiar desplegables
+      nombreHojaOrigen.innerHTML = '<option value="">Selecciona una hoja</option>';
+      nombreHojaOrigen.disabled = true;
+      nombreHojaDestino.innerHTML = '<option value="">Selecciona una hoja</option>';
+      nombreHojaDestino.disabled = true;
+      
+      // Eliminar clases de error
+      document.querySelectorAll('input').forEach(function(input) {
+        input.classList.remove('border-red-500');
+      });
+      
+      // Ocultar notificaciones
+      notification.className = 'hidden';
+      
+      // Mostrar confirmación
+      mostrarNotificacion('Formulario limpiado correctamente', true);
+    });
+    
+    // Manejar el envío del formulario con validación mejorada
+    transferForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Limpiar notificaciones previas
+      notification.className = 'hidden';
+      
+      // Validar los campos obligatorios
+      if (!urlOrigen.value.trim() || !esUrlGoogleSheetsValida(urlOrigen.value.trim())) {
+        mostrarNotificacion('Por favor, introduce la URL de origen válida (https://docs.google.com/spreadsheets/d/...)', false);
+        urlOrigen.focus();
+        return;
+      }
+      
+      if (!nombreHojaOrigen.value) {
+        mostrarNotificacion('Por favor, selecciona una hoja de origen', false);
+        nombreHojaOrigen.focus();
+        return;
+      }
+      
+      if (!urlDestino.value.trim() || !esUrlGoogleSheetsValida(urlDestino.value.trim())) {
+        mostrarNotificacion('Por favor, introduce la URL de destino válida (https://docs.google.com/spreadsheets/d/...)', false);
+        urlDestino.focus();
+        return;
+      }
+      
+      if (!nombreHojaDestino.value) {
+        mostrarNotificacion('Por favor, selecciona una hoja de destino', false);
+        nombreHojaDestino.focus();
+        return;
+      }
+      
+      // Obtener el tipo de transferencia seleccionado
+      let tipoTransferencia = '';
+      for (const radio of radiosTipoTransferencia) {
+        if (radio.checked) {
+          tipoTransferencia = radio.value;
+          break;
+        }
+      }
+      
+      // Obtener el tipo de destino seleccionado
+      let tipoDestino = '';
+      for (const radio of radiosTipoDestino) {
+        if (radio.checked) {
+          tipoDestino = radio.value;
+          break;
+        }
+      }
+      
+      // Validar campos específicos según el tipo de transferencia
+      if (tipoTransferencia === 'rango') {
+        const rangoInicio = document.getElementById('rangoInicio').value.trim();
+        const rangoFin = document.getElementById('rangoFin').value.trim();
+        if (!rangoInicio || !rangoFin || !esRangoValido(`${rangoInicio}:${rangoFin}`)) {
+          mostrarNotificacion('Por favor, introduce el rango completo y válido (ej. A1:B10)', false);
+          return;
+        }
+      } else if (tipoTransferencia === 'columnas') {
+        const columnaInicio = document.getElementById('columnaInicio').value.trim();
+        const columnaCantidad = document.getElementById('columnaCantidad').value.trim();
+        if (!columnaInicio || !columnaCantidad || !/^[A-Za-z]+$/.test(columnaInicio)) {
+          mostrarNotificacion('Por favor, completa los datos de columnas válidos', false);
+          return;
+        }
+      } else if (tipoTransferencia === 'filas') {
+        const filaInicio = document.getElementById('filaInicio').value.trim();
+        const filaCantidad = document.getElementById('filaCantidad').value.trim();
+        if (!filaInicio || !filaCantidad || isNaN(filaInicio) || isNaN(filaCantidad)) {
+          mostrarNotificacion('Por favor, completa los datos de filas válidos', false);
+          return;
+        }
+      }
+      
+      // Validar celda destino si es necesario
+      if (tipoDestino === 'celda') {
+        const celdaInicio = document.getElementById('celdaInicio').value.trim();
+        if (!celdaInicio || !esCeldaValida(celdaInicio)) {
+          mostrarNotificacion('Por favor, introduce la celda de inicio válida (ej. A1)', false);
+          return;
+        }
+      }
+      
+      // Crear objeto con datos de origen
+      const datosOrigen = {
+        url: urlOrigen.value.trim(),
+        hoja: nombreHojaOrigen.value,
+        tipo: tipoTransferencia
+      };
+      
+      // Añadir datos específicos según el tipo de transferencia
+      if (tipoTransferencia === 'rango') {
+        datosOrigen.rangoInicio = document.getElementById('rangoInicio').value.trim();
+        datosOrigen.rangoFin = document.getElementById('rangoFin').value.trim();
+      } else if (tipoTransferencia === 'columnas') {
+        datosOrigen.columnaInicio = document.getElementById('columnaInicio').value.trim();
+        datosOrigen.columnaCantidad = document.getElementById('columnaCantidad').value.trim();
+      } else if (tipoTransferencia === 'filas') {
+        datosOrigen.filaInicio = document.getElementById('filaInicio').value.trim();
+        datosOrigen.filaCantidad = document.getElementById('filaCantidad').value.trim();
+      }
+      
+      // Crear objeto con datos de destino (siempre como celda)
+      const datosDestino = {
+        url: urlDestino.value.trim(),
+        hoja: nombreHojaDestino.value,
+        tipo: 'celda',  // Siempre será 'celda' ahora
+        celdaInicio: document.getElementById('celdaInicio').value.trim() || 'A1'  // Usar A1 si no se especifica
+      };
+      
+      // Mostrar indicador de procesamiento
+      procesando.classList.remove('hidden');
+      procesando.classList.add('flex');
+      btnTransferir.disabled = true;
+      btnLimpiar.disabled = true;
+      
+      // Llamar a la función del servidor para transferir datos
+      google.script.run
+        .withSuccessHandler(function(resultado) {
+          // Ocultar indicador de procesamiento
+          procesando.classList.add('hidden');
+          procesando.classList.remove('flex');
+          btnTransferir.disabled = false;
+          btnLimpiar.disabled = false;
+          
+          if (resultado.exito) {
+            mostrarNotificacion(resultado.mensaje || 'Transferencia completada con éxito', true);
+          } else {
+            mostrarNotificacion(resultado.mensaje || 'Error en la transferencia', false);
+          }
+        })
+        .withFailureHandler(function(error) {
+          procesando.classList.add('hidden');
+          procesando.classList.remove('flex');
+          btnTransferir.disabled = false;
+          btnLimpiar.disabled = false;
+          
+          mostrarNotificacion('Error: ' + error.message, false);
+        })
+        .transferirDatos(datosOrigen, datosDestino);
+    });
+  });
+
+</script>
