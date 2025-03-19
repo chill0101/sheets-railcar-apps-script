@@ -21,7 +21,7 @@ Sheets RailCar te permite delegar esta función en el entorno de Apps Script que
 
 ## 📷 Vista general
 
-![Web App View](hhttps://res.cloudinary.com/dsbjzd18p/image/upload/v1742353068/o9vtboo3vp0yogklctj1.png)
+![Web App View](https://res.cloudinary.com/dsbjzd18p/image/upload/v1742353068/o9vtboo3vp0yogklctj1.png)
 
 
 ## 🔧 Instalación
